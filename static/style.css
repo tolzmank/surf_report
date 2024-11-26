@@ -1,0 +1,273 @@
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #ffffff;
+    color: #333;
+}
+
+h1 {
+    color:#00FFFF;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+h2 {
+    color: white;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+.page-title {
+    background-color: #6E6E6E;
+    border-radius: 20px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+
+
+/* NAV BAR */
+.navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+    background-color: #6E6E6E;
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .navbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0;
+    display: flex;
+    gap: 5px;
+    background-color: #868686;
+    border-radius: 20px;
+    padding: 8px;
+  }
+
+  .navbar ul li {
+    display: inline;
+  }
+
+  .navbar a {
+    text-decoration: none;
+    padding: 8px 15px;
+    color: white;
+    background-color: #868686;
+    border-radius: 20px;
+    transition: background-color 0.2s, color 0.2s;
+
+  }
+
+  .navbar a:hover {
+    background-color: #575757;
+    text-decoration: none;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .navbar a.active {
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+  }
+
+a {
+    text-decoration: none;
+    color: black;
+    background-color: #6ed2d2;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+a:hover {
+    text-decoration: underline;
+    background-color: #80ffff;
+}
+
+.table-button {
+    text-decoration: none;
+    color: black;
+    background-color: #6ed2d2;
+    border-radius: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.table-button:hover {
+    text-decoration: none;
+    background-color: #00ffff;
+}
+
+.add-new-button {
+    background-color: #6ed2d2;
+    border: 0px;
+    border-radius: 20px;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    margin-left: 0px;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+}
+
+.add-new-button:hover {
+    background-color: #00FFFF;
+}
+
+/* TABLES */
+table {
+    background-color: #6E6E6E;
+    width: 100%;
+    border-radius: 20px;
+    border: 0px solid ;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+table th {
+    border: 0px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    color: white;
+}
+
+table td {
+    border: 0px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    color: white;
+}
+
+.fixed-width {
+    width: 50px;
+}
+
+table tr:hover {
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+}
+
+input[type="text"]:read-only {
+    background-color: lightgray;
+  }
+
+input:focus {
+    outline-color: #00FFFF; /* Optional: Removes the default focus outline */
+}
+
+/* UPDATE BOX */
+.update-box {
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+    background-color: #6E6E6E;
+    color: white;
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+fieldset {
+    border: none;
+    padding: 10px;
+}
+
+/* ADD BOX */
+.add-box {
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+    background-color: #6E6E6E;
+    color: white;
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* FORMS */
+form {
+    padding: 20px;
+    align-items: center;
+}
+
+form label {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+form input, form select, form button, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 0px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+form button {
+    background-color: darkgray;
+    color: white;
+    border: none;
+}
+
+form button:hover {
+    background-color: gray;
+}
+
+/* BUTTONS */
+.accept-button {
+    background-color: #6ed2d2;
+    border: 0px;
+    border-radius: 20px;
+    padding: 10px;
+    width: 200px;
+    cursor: pointer;
+    margin-left: 20px;
+    color: black;
+}
+
+.accept-button:hover {
+    background-color: #00FFFF;
+}
+
+.cancel-button {
+    color: black;
+    border-radius: 20px;
+    background-color: lightgray;
+    width: 200px;
+    cursor: pointer;
+}
+
+.cancel-button:hover {
+    background-color: rgb(228, 226, 226);
+}
+
+
+/* SELECT REPORT PAGE */
+.select-user-menu {
+    background-color: #6E6E6E;
+    width: 100%;
+    border-radius: 20px;
+    border: 0px solid ;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.report_window {
+    background-color: #6E6E6E;
+    width: 100%;
+    border-radius: 20px;
+    border: 0px solid ;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    color: white;
+}

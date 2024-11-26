@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <title>Surf Conditions Reporter - {{table_name}}</title>
+    <link rel="icon" href="../static/icons/wave_icon.svg" type="image/x-icon">
+    <link href="../static/style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body onload="browseEntries()">
+    
+    <!-- PAGE TITLE / TABLE NAME -->
+    <div class="page-title">
+      <h1>Surf Conditions Reporter Database</h1>
+      <h2>{{table_name}}</h2>
+    </div>
+    
+    <!-- NAV BAR -->
+      <div class="navbar">
+        <ul>
+          <li><a href="/">Home</a></li>
+        </ul>
+        <ul>
+          <li><a href="/users">Users</a></li>
+          <li><a href="/locations">Locations</a></li>
+          <li><a href="/stations">Stations</a></li>
+          <li><a href="/conditions">Conditions</a></li>
+        </ul>
+        <ul>
+          <li><a href="/locations_stations">Locations-Stations</a></li>
+          <li><a href="/users_locations">Users-Locations</a></li>
+          <li><a href="/users_conditions">Users-Conditions</a></li>
+          <li><a href="/stations_conditions">Stations-Conditions</a></li>
+        </ul>
+      </div>
+
+<!-- UPDATE DETAILS WINDOW -->
+<body>
+    <div id="edit" class="update-box">
+        <form id="update{{Obj_Name}}" action="/update_{{obj_name}}/{{item_data[0][id]}}" method="POST">
+            <legend><strong>Update {{table_name}} Details</strong></legend>
+            <fieldset>
+
+                <!-- ITEM ATTRIBUTES -->
+                {% for key, value in display_names.items() %}
+                {% if key == 'ID' %}
+                    <label for="{{id}}">{{key}}:</label>
+                    <input type="text" value="{{ item_data[0][id] }}" class="form-control" id="{{obj_name}}_id" name="{{obj_name}}_id" readonly required>
+                
+                {% else %}
+                    <label for="{{value}}">{{key}}:</label>
+                    <input type="text" value="{{ item_data[0][value] }}" class="form-control" id="{{value}}" name="{{value}}" required>
+                {% endif %}
+                {% endfor %}
+
+            </fieldset>
+
+
+            <!-- CONFIRM UPDATE/CANCEL BUTTONS -->
+            <input type="submit" value="Save Update {{Obj_Name}}" name="Update_{{Obj_Name}}" class="accept-button">
+            <button class="cancel-button" type="button" onclick="window.location.href='/{{obj_names}}';">Cancel</button>
+
+        </form>
+
+<script src="../static/scripts.js"></script>
+</html>

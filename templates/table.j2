@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>Surf Conditions Reporter - {{table_name}}</title>
+<link rel="icon" href="../static/icons/wave_icon.svg" type="image/x-icon">
+<link href="../static/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body onload="browseEntries()">
+
+  
+<!-- PAGE TITLE / TABLE NAME -->
+ <div class="page-title">
+  <h1>Surf Conditions Reporter Database</h1>
+  <h2>{{table_name}}</h2>
+ </div>
+
+
+<!-- NAV BAR -->
+  <div class="navbar">
+    <ul>
+      <li><a href="/">Home</a></li>
+    </ul>
+    <ul>
+      <li><a href="/users">Users</a></li>
+      <li><a href="/locations">Locations</a></li>
+      <li><a href="/stations">Stations</a></li>
+      <li><a href="/conditions">Conditions</a></li>
+    </ul>
+    <ul>
+      <li><a href="/locations_stations">Locations-Stations</a></li>
+      <li><a href="/users_locations">Users-Locations</a></li>
+      <li><a href="/users_conditions">Users-Conditions</a></li>
+      <li><a href="/stations_conditions">Stations-Conditions</a></li>
+    </ul>
+  </div>
+
+<!-- DISPLAY TABLE -->
+<div id="browse">
+<table border="1" cellpadding="5">
+
+
+<!-- TABLE HEADER -->
+  {% if data %}
+  <thead>
+      <tr>
+        <th colspan="2"><input class="add-new-button" type="button" value="Add New {{Obj_Name}}" onClick="newEntry()"> </th>
+        {% for key, value in display_names.items() %}
+          <th scope="col" data-field="{{ value }}" data-filter-control="input">{{ key }}</th>
+        {% endfor %}
+      </tr>
+  </thead>
+
+
+<!-- TABLE VALUES -->
+    <tbody>
+      {% for item in data %}
+        <tr>
+          <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[id] }}" class="table-button">Edit</a></td>
+          <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ item[id] }}', '{{ item[main_name] }}')" class="table-button">Delete</a></td>
+          
+          {% for key in item.keys() %}
+            <td align="right">{{ item[key] }}</td>  
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+    {% endif %}
+
+</table>
+<p>&nbsp;</p>
+</div>
+
+
+<!-- ADD NEW VALUE FORM -->
+<div id="insert" class="add-box">
+  <!-- form to INSERT new data into users-->
+  <form id="insert{{Obj_Name}}" action="/add_{{obj_name}}" method="POST">
+    <legend><strong>Enter {{Obj_Name}} Details</strong></legend>
+
+    {% for key, value in display_names.items() %}
+    {% if key != 'ID' %}
+      <fieldset>
+        <label for="{{value}}">{{key}}:</label>
+        <input type="text" class="form-control" id="{{value}}" name="{{value}}" placeholder="" required>
+      </fieldset>
+    {% endif %}
+    {% endfor %}
+
+    <!-- CREATE/CANCEL BUTTONS -->
+    <input type="submit" value="Add {{Obj_Name}}" name="Add_{{Obj_Name}}" class="accept-button">
+    <input class="cancel-button" type="button" value="Cancel" onClick="browseEntries()"> 
+      </form>
+</div>
+
+<script >
+
+  function showform(dowhat) {
+    /*
+    * four DIVS: browse, insert, update, delete
+    * this function sets one visible the others not
+    */
+    if (dowhat == 'insert'){
+      document.getElementById('browse').style.display = 'none';
+      document.getElementById('insert').style.display = 'block';
+      document.getElementById('update').style.display = 'none';
+      document.getElementById('delete').style.display = 'none';
+    }
+    else if (dowhat == 'update'){
+      document.getElementById('browse').style.display = 'none';
+      document.getElementById('insert').style.display = 'none';
+      document.getElementById('update').style.display = 'block';
+      document.getElementById('delete').style.display = 'none';
+    }
+    else if (dowhat == 'delete'){
+      document.getElementById('browse').style.display = 'none';
+      document.getElementById('insert').style.display = 'none';
+      document.getElementById('update').style.display = 'none';
+      document.getElementById('delete').style.display = 'block';
+    }
+    else if (dowhat == 'all'){
+      document.getElementById('browse').style.display = 'block';
+      document.getElementById('insert').style.display = 'block';
+      document.getElementById('update').style.display = 'block';
+      document.getElementById('delete').style.display = 'block';
+    }
+    else { //by default display browse
+      document.getElementById('browse').style.display = 'block';
+      document.getElementById('insert').style.display = 'none';
+      document.getElementById('update').style.display = 'none';
+      document.getElementById('delete').style.display = 'none';
+    }
+  }
+  function newEntry() { showform('insert'); }
+  function updateEntry(pid) { showform('update'); }
+
+  function deleteEntry(itemId, itemName) { 
+    if (confirm(`Are you sure you want to delete: ${itemName}?`)) {
+      window.location.href = `/delete_{{obj_name}}/${itemId}`;
+    }
+  }
+
+  function browseEntries() { showform ('browse'); }
+  function showAll() { showform ('all'); }
+
+
+
+</script>
+</body>
+</html>
