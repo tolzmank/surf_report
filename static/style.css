@@ -194,6 +194,26 @@ fieldset {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* SELECT BOX */
+.select-box {
+    font-weight: bold;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+    background-color: #6E6E6E;
+    color: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+select {
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    width: auto;
+}
+
 /* FORMS */
 form {
     padding: 20px;
@@ -208,7 +228,7 @@ form label {
 form input, form select, form button, form textarea {
     width: 100%;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 0px solid #ddd;
     border-radius: 10px;
     font-size: 1rem;

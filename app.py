@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, json, redirect
+from flask import Flask, render_template, json, jsonify, redirect
 from flask_mysqldb import MySQL
 from flask import request
 import os
@@ -245,8 +245,7 @@ def show_stations():
                                 'ID': 'station_id',
                                 'Station Code': 'station_code',
                                 'Station Name': 'station_name',
-                                'Station URL': 'station_url',
-                                'Date Refreshed': 'date_refreshed'
+                                'Station URL': 'station_url'
                             }
                            )
 
@@ -408,6 +407,73 @@ def delete_condition(condition_id):
         return redirect("/conditions")
 
 
+# -- CRUD: locations_stations --
+@app.route('/locations_stations/', defaults={'location_id': None})
+@app.route('/locations_stations/<int:location_id>', methods=['GET'])
+def show_locations_stations(location_id):
+    query = "SELECT * FROM locations"
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    locations = cur.fetchall()
+    if location_id is None:
+        return render_template('intersect_table.j2', 
+                                data = locations,
+                                table_name = 'Locations-Stations',
+                                obj_name = 'location_station',
+                                Obj_Name = 'Location-Station',
+                                id = ('location_name', 'station_name'),
+                                main_name = 'location_name',
+                                display_names = {
+                                    'Station ID': 'station_id',
+                                    'Station Code': 'station_code',
+                                    'Station Name': 'station_name',
+                                    'URL': 'station_url'
+                                },
+                                coverage = {},
+                                location_name = '',
+                                last_select = None
+                            )
+    
+    else:
+        query = """
+                SELECT 
+                    s.station_id,
+                    s.station_code,
+                    s.station_name,
+                    s.station_url
+                FROM 
+                    locations_stations ls
+                JOIN 
+                    locations l ON ls.location_id = l.location_id
+                JOIN 
+                    stations s ON ls.station_id = s.station_id
+                WHERE l.location_id = %s
+                """ % (location_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        station_coverage = cur.fetchall()
+
+        query2 = "SELECT location_name FROM locations WHERE location_id = %s" % (location_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query2)
+        location_name = cur.fetchall()
+        print(location_name)
+        return render_template('intersect_table.j2', 
+                                data = locations,
+                                location_name = location_name,
+                                coverage = station_coverage,
+                                table_name = 'Locations-Stations',
+                                obj_name = 'location_station',
+                                Obj_Name = 'Location-Station',
+                                id = ('location_name', 'station_name'),
+                                main_name = 'location_name',
+                                display_names = {
+                                    'Station ID': 'station_id',
+                                    'Station Code': 'station_code',
+                                    'Station Name': 'station_name',
+                                    'URL': 'station_url'
+                                }
+                            )
 
 
 
