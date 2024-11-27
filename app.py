@@ -425,7 +425,7 @@ def show_locations_stations(location_id):
                                 id = 'location_id',
                                 view_reference_name = 'Location',
                                 view_name = 'Station Coverage',
-                                db_view_name = 'location_name'
+                                db_view_main_name = 'location_name'
                             )
     
     else:
@@ -451,6 +451,12 @@ def show_locations_stations(location_id):
         cur = mysql.connection.cursor()
         cur.execute(query2)
         location_name = cur.fetchall()
+
+        query3 = "SELECT * FROM stations"
+        cur = mysql.connection.cursor()
+        cur.execute(query3)
+        all_stations = cur.fetchall()
+
         return render_template('intersect_table.j2', 
                                 data = locations,
                                 main_name = location_name,
@@ -459,6 +465,8 @@ def show_locations_stations(location_id):
                                 obj_name = 'locations_stations',
                                 Obj_Name = 'Location-Station',
                                 id = 'location_id',
+                                assoc_id = 'station_id',
+                                ref_id = location_id,
                                 display_names = {
                                     'Station ID': 'station_id',
                                     'Station Code': 'station_code',
@@ -468,21 +476,25 @@ def show_locations_stations(location_id):
                                 view_reference_name = 'Location',
                                 assoc_name = 'Station',
                                 view_name = 'Station Coverage',
-                                db_view_name = 'location_name'
+                                db_view_main_name = 'location_name',
+                                db_assoc_name = ['station_code', 'station_name'],
+                                all_assoc = all_stations
+                                
                             )
 
 
 @app.route('/add_locations_stations/', methods=['POST'])
 def add_locations_stations():
     if request.method == 'POST':
-        if request.form.get("Add_Location_Station"):
+        if request.form.get("Add"):
             location_id = request.form['location_id']
             station_id = request.form['station_id']
+            print(f"LOCATION_ID: {location_id}, STATION_ID: {station_id}")
             query = "INSERT INTO locations_stations (location_id, station_id) VALUES (%s, %s)"
             cur = mysql.connection.cursor()
             cur.execute(query, (location_id, station_id))
             mysql.connection.commit()
-            return redirect("/locations_stations")
+            return redirect(f"/locations_stations/{location_id}")
 
 
 
