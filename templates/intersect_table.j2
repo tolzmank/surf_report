@@ -48,11 +48,11 @@
           {% if data %}
           <th colspan="5">
             <form class="intersection-select" action="" method='GET'>
-              <label for="{{id}}">View {{view_name}}:</label>
-              <select id="{{id}}" name="{{id}}" onchange="this.form.action='/{{obj_name}}/' + this.value; this.form.submit();">
+              <label for="{{main_id}}">View {{view_name}}:</label>
+              <select id="{{main_id}}" name="{{main_id}}" onchange="this.form.action='/{{obj_name}}/' + this.value; this.form.submit();">
                 <option value="" disabled selected>Select {{view_reference_name}}</option>
                 {% for item in data %}
-                  <option value="{{item[id]}}">{{item[db_view_main_name]}}</option>
+                  <option value="{{item[main_id]}}">{{item[db_view_main_name]}}</option>
                 {% endfor %}
               </select>
             </form>
@@ -81,8 +81,8 @@
       <tbody>
         {% for item in coverage %}
           <tr>
-            <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[id] }}" class="table-button">Edit</a></td>
-            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ item[id] }}', '{{ item[main_name] }}')" class="table-button">Delete</a></td>
+            <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[assoc_id] }}" class="table-button">Edit</a></td>
+            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_view_main_name]}}', '{{item[db_assoc_name[1]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
             {% for key in item.keys() %}
               <td align="right">{{ item[key] }}</td>
             {% endfor %}
@@ -103,7 +103,7 @@
   {% if coverage %}
   <form action="/add_{{obj_name}}" method="POST">
     <legend><strong>Add a {{assoc_name}} that covers {{main_name[0][db_view_main_name]}}</strong></legend>
-    <input type="hidden" name="{{id}}" value="{{ref_id}}">
+    <input type="hidden" name="{{main_id}}" value="{{ref_id}}">
 
     <!-- SELECTION -->
     {% if data %}
@@ -128,6 +128,7 @@
     </form>
     {% endif %}
 </div>
+
 
 
 
@@ -172,9 +173,9 @@
   function newEntry() { showform('insert'); }
   function updateEntry(pid) { showform('update'); }
 
-  function deleteEntry(itemId, itemName) { 
-    if (confirm(`Are you sure you want to delete: ${itemName}?`)) {
-      window.location.href = `/delete_{{obj_name}}/${itemId}`;
+  function deleteEntry(mainItemID, assocItemID, mainItemName, assocItemName, tableName) { 
+    if (confirm(`Confirm removal ${tableName} association: ${assocItemName} from ${mainItemName}?`)) {
+      window.location.href = `/delete_{{obj_name}}/${mainItemID}/${assocItemID}`;
     }
   }
 

@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, jsonify
 from flask_mysqldb import MySQL
 from flask import request
 import os
@@ -359,7 +359,6 @@ def add_condition():
 @app.route('/update_condition/<int:condition_id>', methods=['POST', 'GET'])
 def update_condition(condition_id):
     if request.method == "GET":
-        # mySQL query to grab the info of the person with our passed id
         query = "SELECT * FROM conditions WHERE condition_id = %s" % (condition_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
@@ -422,7 +421,7 @@ def show_locations_stations(location_id):
                                 coverage = {},
                                 table_name = 'Locations-Stations',
                                 obj_name = 'locations_stations',
-                                id = 'location_id',
+                                main_id = 'location_id',
                                 view_reference_name = 'Location',
                                 view_name = 'Station Coverage',
                                 db_view_main_name = 'location_name'
@@ -464,7 +463,7 @@ def show_locations_stations(location_id):
                                 table_name = 'Locations-Stations',
                                 obj_name = 'locations_stations',
                                 Obj_Name = 'Location-Station',
-                                id = 'location_id',
+                                main_id = 'location_id',
                                 assoc_id = 'station_id',
                                 ref_id = location_id,
                                 display_names = {
@@ -478,27 +477,30 @@ def show_locations_stations(location_id):
                                 view_name = 'Station Coverage',
                                 db_view_main_name = 'location_name',
                                 db_assoc_name = ['station_code', 'station_name'],
-                                all_assoc = all_stations
-                                
+                                all_assoc = all_stations  
                             )
 
 
-@app.route('/add_locations_stations/', methods=['POST'])
+@app.route('/add_locations_stations', methods=['POST'])
 def add_locations_stations():
     if request.method == 'POST':
         if request.form.get("Add"):
             location_id = request.form['location_id']
             station_id = request.form['station_id']
-            print(f"LOCATION_ID: {location_id}, STATION_ID: {station_id}")
             query = "INSERT INTO locations_stations (location_id, station_id) VALUES (%s, %s)"
             cur = mysql.connection.cursor()
             cur.execute(query, (location_id, station_id))
             mysql.connection.commit()
             return redirect(f"/locations_stations/{location_id}")
 
-
-
-
+@app.route('/delete_locations_stations/<int:location_id>/<int:station_id>', methods=['GET'])
+def delete_locations_stations(location_id, station_id):
+    if request.method == 'GET':
+        query = "DELETE FROM locations_stations WHERE location_id = %s AND station_id = %s"
+        cur = mysql.connection.cursor()
+        cur.execute(query, (location_id, station_id))
+        mysql.connection.commit()
+        return redirect(f"/locations_stations/{location_id}")
 
 
 
