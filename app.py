@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, json, jsonify, redirect
+from flask import Flask, render_template, redirect
 from flask_mysqldb import MySQL
 from flask import request
 import os
@@ -418,20 +418,14 @@ def show_locations_stations(location_id):
     if location_id is None:
         return render_template('intersect_table.j2', 
                                 data = locations,
-                                table_name = 'Locations-Stations',
-                                obj_name = 'location_station',
-                                Obj_Name = 'Location-Station',
-                                id = ('location_name', 'station_name'),
-                                main_name = 'location_name',
-                                display_names = {
-                                    'Station ID': 'station_id',
-                                    'Station Code': 'station_code',
-                                    'Station Name': 'station_name',
-                                    'URL': 'station_url'
-                                },
+                                main_name = '',
                                 coverage = {},
-                                location_name = '',
-                                last_select = None
+                                table_name = 'Locations-Stations',
+                                obj_name = 'locations_stations',
+                                id = 'location_id',
+                                view_reference_name = 'Location',
+                                view_name = 'Station Coverage',
+                                db_view_name = 'location_name'
                             )
     
     else:
@@ -457,23 +451,41 @@ def show_locations_stations(location_id):
         cur = mysql.connection.cursor()
         cur.execute(query2)
         location_name = cur.fetchall()
-        print(location_name)
         return render_template('intersect_table.j2', 
                                 data = locations,
-                                location_name = location_name,
+                                main_name = location_name,
                                 coverage = station_coverage,
                                 table_name = 'Locations-Stations',
-                                obj_name = 'location_station',
+                                obj_name = 'locations_stations',
                                 Obj_Name = 'Location-Station',
-                                id = ('location_name', 'station_name'),
-                                main_name = 'location_name',
+                                id = 'location_id',
                                 display_names = {
                                     'Station ID': 'station_id',
                                     'Station Code': 'station_code',
                                     'Station Name': 'station_name',
                                     'URL': 'station_url'
-                                }
+                                },
+                                view_reference_name = 'Location',
+                                assoc_name = 'Station',
+                                view_name = 'Station Coverage',
+                                db_view_name = 'location_name'
                             )
+
+
+@app.route('/add_locations_stations/', methods=['POST'])
+def add_locations_stations():
+    if request.method == 'POST':
+        if request.form.get("Add_Location_Station"):
+            location_id = request.form['location_id']
+            station_id = request.form['station_id']
+            query = "INSERT INTO locations_stations (location_id, station_id) VALUES (%s, %s)"
+            cur = mysql.connection.cursor()
+            cur.execute(query, (location_id, station_id))
+            mysql.connection.commit()
+            return redirect("/locations_stations")
+
+
+
 
 
 

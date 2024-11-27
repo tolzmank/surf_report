@@ -34,60 +34,96 @@
   </div>
 
 
-
-
-<!-- DISPLAY TABLE -->
+<!-- DISPLAY CONTENT -->
 {% if data %}
-<div id="station_coverage" style="display: block;">
+<div>
   <table border="1" cellpadding="5">
 
   <!-- TABLE HEADER -->
     <thead>
       <tr>
-        {% if location_name %}
-        <th colspan="3"><h2 style="color: #00FFFF;">{{location_name[0]['location_name']}}</h2></th>
-        {% endif %}
-        <th>
+
+
+        <!-- SELECT VIEW FORM -->
           {% if data %}
-          <form action="" method='GET'>
-              <label for="location_id">View Station Coverage:</label>
-              <select id="location_id" name="location_id" onchange="this.form.action='/locations_stations/' + this.value; this.form.submit();">
-                <option value="" disabled selected>Select Location</option>
+          <th colspan="5">
+            <form class="intersection-select" action="" method='GET'>
+              <label for="{{id}}">View {{view_name}}:</label>
+              <select id="{{id}}" name="{{id}}" onchange="this.form.action='/{{obj_name}}/' + this.value; this.form.submit();">
+                <option value="" disabled selected>Select {{view_reference_name}}</option>
                 {% for item in data %}
-                  <option value="{{item['location_id']}}">{{item['location_name']}}</option>
+                  <option value="{{item[id]}}">{{item[db_view_name]}}</option>
                 {% endfor %}
               </select>
             </form>
-        {% endif %}
-        </th>
+          </th>
+          {% endif %}
+          
       </tr>
-        <tr>
-          {% if coverage %}
+      <tr>
+              <!-- SELECTION TITLE -->
+              {% if main_name %}
+              <th colspan="3"><h2 style="color: #00FFFF;">{{main_name[0][db_view_name]}}</h2></th>
+              {% endif %}
+            </tr>
+      <!-- TABLE HEADER -->
+      <tr>
+      {% if coverage %}
+          <th colspan="2"><input class="add-new-button" type="button" value="Add New Association" onClick="newEntry()"></th>
           {% for key, value in display_names.items() %}
           <th scope="col" data-field="{{ value }}" data-filter-control="input">{{ key }}</th>
-        {% endfor %}
+          {% endfor %}
         </tr>
     </thead>
   
-  <!-- TABLE VALUES -->
-    <tbody>
-      {% for item in coverage %}
-        <tr>
-          
-          
-          {% for key in item.keys() %}
-            <td align="right">{{ item[key] }}</td>  
-          {% endfor %}
-        </tr>
-      {% endfor %}
-    </tbody>
-    {% endif %}
-    {% endif %}
+      <!-- TABLE VALUES -->
+      <tbody>
+        {% for item in coverage %}
+          <tr>
+            <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[id] }}" class="table-button">Edit</a></td>
+          <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ item[id] }}', '{{ item[main_name] }}')" class="table-button">Delete</a></td>
+            {% for key in item.keys() %}
+              <td align="right">{{ item[key] }}</td>  
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+      {% endif %}
+{% endif %}
 
 </table>
 <p>&nbsp;</p>
 </div>
 
+
+<!-- ADD NEW VALUE FORM -->
+{% if coverage %}
+<div id="insert" class="add-box">
+  
+  <!-- form to INSERT new data into users-->
+  <form id="insert{{Obj_Name}}" action="/add_{{obj_name}}" method="POST">
+    <legend><strong>Enter {{assoc_name}} Details</strong></legend>
+
+    <!-- SELECT VIEW FORM -->
+    {% if data %}
+    <th colspan="5">
+        <label for="{{id}}">View {{view_name}}:</label>
+        <select id="{{id}}" name="{{id}}" onchange="this.form.action='/{{obj_name}}/' + this.value; this.form.submit();">
+          <option value="" disabled selected>Select {{view_reference_name}}</option>
+          {% for item in data %}
+            <option value="{{item[id]}}">{{item[db_view_name]}}</option>
+          {% endfor %}
+        </select>
+    </th>
+    {% endif %}
+
+    <!-- CREATE/CANCEL BUTTONS -->
+    <input type="submit" value="Add {{Obj_Name}}" name="Add_{{Obj_Name}}" class="accept-button">
+    <input class="cancel-button" type="button" value="Cancel" onClick="browseEntries()"> 
+      </form>
+  
+</div>
+{% endif %}
 
 
 <script >
