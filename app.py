@@ -18,18 +18,29 @@ mysql = MySQL(app)
 
 
 # Routes
-@app.route('/')
-def root():
-    return redirect('/users')
-    #try:
-        #query = "SELECT * FROM users"
-        #cur = mysql.connection.cursor()
-        #cur.execute(query)
-        #users = cur.fetchall()
-        #return render_template('index.j2', users=users)
-    #except Exception as e:
-    #    print(f"MySQL connect FAILED: {e}")
-    #    return "<h1>Failed to connect to MySQL</h1>"
+@app.route('/', defaults={'user_id': None})
+@app.route('/<int:user_id>', methods=['GET'])
+def root(user_id):
+        try:
+            query = "SELECT * FROM users"
+            cur = mysql.connection.cursor()
+            cur.execute(query)
+            users = cur.fetchall()
+        except Exception as e:
+            print(f"MySQL connect FAILED: {e}")
+            return "<h1>Failed to connect to MySQL</h1>"
+        
+        if user_id is None:
+            return render_template('index.j2', 
+                                users = users,
+                                user_id = None
+                                )
+        else:
+            return render_template('index.j2',
+                                   users = users,
+                                   user_id = user_id
+                                   )
+
 
 
 # -- GET REPORT for USER --
@@ -227,7 +238,6 @@ def delete_location(location_id):
         return redirect("/locations")
 
 
-
 # -- CRUD: stations --
 @app.route('/stations', methods=['GET'])
 def show_stations():
@@ -321,7 +331,6 @@ def delete_station(station_id):
         return redirect("/stations")
 
 
-
 # -- CRUD: conditions --
 @app.route('/conditions', methods=['GET'])
 def show_conditions():
@@ -399,7 +408,6 @@ def delete_condition(condition_id):
         mysql.connection.commit()
 
         return redirect("/conditions")
-
 
 
 # INTERSECTION TABLES
@@ -484,6 +492,7 @@ def add_locations_stations():
             mysql.connection.commit()
             return redirect(f"/locations_stations/{location_id}")
 
+
 @app.route('/delete_locations_stations/<int:location_id>/<int:station_id>', methods=['GET'])
 def delete_locations_stations(location_id, station_id):
     if request.method == 'GET':
@@ -492,6 +501,7 @@ def delete_locations_stations(location_id, station_id):
         cur.execute(query, (location_id, station_id))
         mysql.connection.commit()
         return redirect(f"/locations_stations/{location_id}")
+
 
 
 # -- CRUD: users_locations --
@@ -744,7 +754,13 @@ def show_stations_conditions(station_id):
                                 assoc_name = 'Reading',
                                 db_assoc_name = ['condition_type'],
                                 all_assoc = {},
-                                all_conditions = all_conditions
+                                all_conditions = all_conditions,
+                                wind_compass = [
+                                    'N', 'NNE', 'NE', 'ENE',
+                                    'E', 'ESE', 'SE', 'SSE',
+                                    'S', 'SSW', 'SW', 'WSW',
+                                    'W', 'WNW', 'NW', 'NNW'
+                                ]
                             )
 
 
@@ -781,15 +797,46 @@ def update_stations_conditions(reading_id, station_id):
         cur = mysql.connection.cursor()
         cur.execute(query)
         reading = cur.fetchall()
+
+        query2 = "SELECT * FROM stations WHERE station_id = %s" % (station_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query2)
+        station = cur.fetchall()
+
+        query3 = "SELECT * FROM conditions"
+        cur = mysql.connection.cursor()
+        cur.execute(query3)
+        all_conditions = cur.fetchall()
+
+        query4 = "SELECT condition_type FROM conditions WHERE condition_id = %s" % (reading[0]['condition_id'])
+        cur = mysql.connection.cursor()
+        cur.execute(query4)
+        current_condition_type = cur.fetchall()
+        
+
         return render_template("intersect_table_update.j2", 
-                               reading=reading,
-                               station_id = station_id
+                                reading=reading,
+                                station_id = station_id,
+                                station = station,
+                                current_condition_type = current_condition_type[0]['condition_type'],
+                                all_conditions = all_conditions,
+                                display_names = {
+                                    'Condition Type': 'condition_type',
+                                    'Condition Reading': 'condition_reading',
+                                    'Wind Direction': 'wind_direction',
+                                    'Date Refreshed': 'date_refreshed'
+                                },
+                                wind_compass = [
+                                    'N', 'NNE', 'NE', 'ENE',
+                                    'E', 'ESE', 'SE', 'SSE',
+                                    'S', 'SSW', 'SW', 'WSW',
+                                    'W', 'WNW', 'NW', 'NNW'
+                                ]
                                )
 
 
     if request.method == "POST":
         if request.form.get("Update"):
-            reading_id = request.form['reading_id']
             condition_id = request.form['condition_id']
             condition_reading = request.form['condition_reading']
             wind_direction = request.form['wind_direction']
@@ -799,11 +846,11 @@ def update_stations_conditions(reading_id, station_id):
                 SET stations_conditions.condition_id = %s, 
                     stations_conditions.condition_reading = %s,
                     stations_conditions.wind_direction = %s,
-                    stations_conditions.date_refreshed = %s,
+                    stations_conditions.date_refreshed = %s
                 WHERE stations_conditions.reading_id = %s
                 """
             cur = mysql.connection.cursor()
-            cur.execute(query, (condition_id, condition_reading, wind_direction, date_refreshed))
+            cur.execute(query, (condition_id, condition_reading, wind_direction, date_refreshed, reading_id))
             mysql.connection.commit()
             return redirect(f"/stations_conditions/{station_id}")
 

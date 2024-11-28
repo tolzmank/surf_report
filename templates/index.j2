@@ -35,23 +35,32 @@
 
 <!-- SELECT USER REPORT -->
  <div class="select-user-menu">
-  <form id="" action="/report" method="POST">
+  <form action="" method="GET">
 
-    <label for="user">Select User:</label>
-    <select id="user_id" name="user_id">
-
+    <label for="user">Get Surf Report for:</label>
+    <select id="user_id" name="user_id" onchange="this.form.action='/' + this.value; this.form.submit();">
+      <option value="" disable selected>Select User</option>
     {% for user in users %}
-      <option id="user_id" name="user_id" value="{{ user[user_id] }}">{{user['username']}}</option>
+      <option value="{{ user['user_id'] }}">{{user['username']}}</option>
     {% endfor %}
-
     </select>
-    <input type="submit" value="Get Report" name="Get_Report" class="accept-button">
+
   </form>
  </div>
 
 </table>
 <p>&nbsp;</p>
 </div>
+
+
+<!-- SURF REPORT -->
+<div id="browse" class="report_window">
+
+  {% if user_id %}
+  <p>Surf Report for user_id: {{user_id}}</p>
+  {% endif %}
+
+   </div>
 
 
 <script src="../static/scripts.js"></script>

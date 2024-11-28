@@ -1,8 +1,8 @@
 <html>
 <head>
 <title>Surf Conditions Reporter - {{table_name}}</title>
-<link rel="icon" href="../static/icons/wave_icon.svg" type="image/x-icon">
-<link href="../static/style.css" rel="stylesheet" type="text/css" />
+<link rel="icon" href="/static/icons/wave_icon.svg" type="image/x-icon">
+<link href="/static/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body onload="browseEntries()">
 
@@ -35,59 +35,67 @@
 
 
 <!-- DISPLAY CONTENT -->
-{% if data %}
-<div id="browse" >
-  <table border="1" cellpadding="5">
+{% if reading %}
+<div id="browse">
+  <form action="/update_stations_conditions/{{reading[0]['reading_id']}}/{{station_id}}" method="POST">
+    <input type="hidden" value="{{reading[0]['reading_id']}}" name="reading_id">
+    <input type="hidden" value="{{station_id}}" name="station_id">
+    <table border="1" cellpadding="5">
 
   <!-- TABLE HEADER -->
     <thead>
+        <tr>
+          <!-- SELECTION TITLE -->
+            <th colspan="3">
+              <p>Update Condition Reading Details for Station:</p>
+              <h2 style="color: #00FFFF;">{{station[0]['station_name']}}</h2>
+            </th>
+        </tr>
+        <!-- UPDATE FORM -->
+        <tr>
+          <th>
+            <label for="condition">Select Condition Type:</label>
+            <select name="condition_id" required>
+                <option value="{{reading[0]['condition_id']}}" selected>{{current_condition_type}}</option>
+                {% for item in all_conditions %}
+                {% if  item['condition_id'] != reading[0]['condition_id'] %}
+                <option value="{{item['condition_id']}}">{{item['condition_type']}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+            <label for="condition_reading">Condition Reading:</label>
+            <input type="number" step="0.01" name="condition_reading" value="{{reading[0]['condition_reading']}}">
 
-      <tr>
-        <!-- SELECTION TITLE -->
-        {% if main_name %}
-          <th colspan="3"><h2 style="color: #00FFFF;">{{main_name[0][db_main_name]}}</h2></th>
-        
-      </tr>
+            <label for="wind_direction">Wind Direction:</label>
+            <select name="wind_direction">
+              <option value="{{reading[0]['wind_direction']}}" selected>{{reading[0]['wind_direction']}}</option>
+              {% for item in wind_compass %}
+              <option value="{{item}}">{{item}}</option>
+              {% endfor %}
+            </select>
 
-      <!-- TABLE HEADER -->
-      <tr>
-      {% if coverage %}
-          <th colspan="2"><input class="add-new-button" type="button" value="Add New" onClick="newEntry()"></th>
-          {% for key, value in display_names.items() %}
-          <th scope="col" data-field="{{ value }}" data-filter-control="input">{{ key }}</th>
-          {% endfor %}
+            <input type="datetime-local" name="date_refreshed" value="{{reading[0]['date_refreshed']|replace(' ', 'T')}}">
+          </th>
+          <p>{{reading[0]}}</p>
         </tr>
     </thead>
-  
-      <!-- TABLE VALUES -->
-      <tbody>
-        {% for item in coverage %}
-          <tr>
-            <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[assoc_id] }}" class="table-button">Edit</a></td>
-            {% if db_assoc_name|length > 1 %}
-            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_main_name]}}', '{{item[db_assoc_name[1]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
-            {% else %}
-            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_main_name]}}', '{{item[db_assoc_name[0]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
-            {% endif %}
-            {% for key in item.keys() %}
-              <td align="right">{{ item[key] }}</td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-      {% else %}
-      <tr><th>No {{assoc_name}}s</th></tr>
-      <tr><th><input class="add-new-button" type="button" value="Add New" onClick="newEntry()"></th></tr>
-
-      {% endif %}
-      {% endif %}
+    <tr>
+      <th>
+        <input type="submit" value="Save Update Reading" name="Update" class="accept-button">
+        <button class="cancel-button" type="button" onclick="window.location.href='/stations_conditions/{{reading[0][reading_id]}}/{{station_id}}';">Cancel</button>
+      </th>
+    </tr>
+  </form>
+</table>
 {% endif %}
 
-</table>
+
 <p>&nbsp;</p>
+</div>
 </div>
 
 
+<!-- UPDATE FORM -->
 
 
 <script >
