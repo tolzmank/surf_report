@@ -57,6 +57,7 @@ def get_report():
         return render_template('report.j2', surf_report = surf_report)
 
 
+# MAIN TABLES
 # -- CRUD: users --
 @app.route('/users', methods=['GET'])
 def show_users():
@@ -378,20 +379,14 @@ def update_condition(condition_id):
 
 
     if request.method == "POST":
-        # fire off if user clicks the 'Edit Person' button
         if request.form.get("Update_Condition"):
-            # grab user form inputs
             condition_id = request.form["condition_id"]
             condition_type = request.form["condition_type"]
             measurement_unit = request.form["measurement_unit"]
-
-            # no null inputs
             query = "UPDATE conditions SET conditions.condition_type = %s, conditions.measurement_unit = %s WHERE conditions.condition_id = %s"
             cur = mysql.connection.cursor()
             cur.execute(query, (condition_type, measurement_unit, condition_id))
             mysql.connection.commit()
-
-            # redirect back to people page after we execute the update query
             return redirect("/conditions")
 
 
@@ -406,6 +401,8 @@ def delete_condition(condition_id):
         return redirect("/conditions")
 
 
+
+# INTERSECTION TABLES
 # -- CRUD: locations_stations --
 @app.route('/locations_stations/', defaults={'location_id': None})
 @app.route('/locations_stations/<int:location_id>', methods=['GET'])
@@ -417,29 +414,22 @@ def show_locations_stations(location_id):
     if location_id is None:
         return render_template('intersect_table.j2', 
                                 data = locations,
-                                main_name = '',
                                 coverage = {},
                                 table_name = 'Locations-Stations',
                                 obj_name = 'locations_stations',
+                                main_name = '',
                                 main_id = 'location_id',
-                                view_reference_name = 'Location',
-                                view_name = 'Station Coverage',
-                                db_view_main_name = 'location_name'
+                                db_main_name = 'location_name',
+                                view_select_name = 'Location',
+                                view_label = 'Station Coverage'
                             )
     
     else:
         query = """
-                SELECT 
-                    s.station_id,
-                    s.station_code,
-                    s.station_name,
-                    s.station_url
-                FROM 
-                    locations_stations ls
-                JOIN 
-                    locations l ON ls.location_id = l.location_id
-                JOIN 
-                    stations s ON ls.station_id = s.station_id
+                SELECT s.station_id, s.station_code, s.station_name, s.station_url
+                FROM locations_stations ls
+                JOIN locations l ON ls.location_id = l.location_id
+                JOIN stations s ON ls.station_id = s.station_id
                 WHERE l.location_id = %s
                 """ % (location_id)
         cur = mysql.connection.cursor()
@@ -458,12 +448,16 @@ def show_locations_stations(location_id):
 
         return render_template('intersect_table.j2', 
                                 data = locations,
-                                main_name = location_name,
                                 coverage = station_coverage,
                                 table_name = 'Locations-Stations',
                                 obj_name = 'locations_stations',
-                                Obj_Name = 'Location-Station',
+                                main_name = location_name,
                                 main_id = 'location_id',
+                                db_main_name = 'location_name',
+                                view_select_name = 'Location',
+                                view_label = 'Station Coverage',
+
+                                Obj_Name = 'Location-Station',
                                 assoc_id = 'station_id',
                                 ref_id = location_id,
                                 display_names = {
@@ -472,12 +466,9 @@ def show_locations_stations(location_id):
                                     'Station Name': 'station_name',
                                     'URL': 'station_url'
                                 },
-                                view_reference_name = 'Location',
                                 assoc_name = 'Station',
-                                view_name = 'Station Coverage',
-                                db_view_main_name = 'location_name',
                                 db_assoc_name = ['station_code', 'station_name'],
-                                all_assoc = all_stations  
+                                all_assoc = all_stations
                             )
 
 
@@ -502,6 +493,281 @@ def delete_locations_stations(location_id, station_id):
         mysql.connection.commit()
         return redirect(f"/locations_stations/{location_id}")
 
+
+# -- CRUD: users_locations --
+@app.route('/users_locations/', defaults={'user_id': None})
+@app.route('/users_locations/<int:user_id>', methods=['GET'])
+def show_users_locations(user_id):
+    query = "SELECT * FROM users"
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    users = cur.fetchall()
+    if user_id is None:
+        return render_template('intersect_table.j2', 
+                                data = users,
+                                coverage = {},
+                                table_name = 'Users-Locations',
+                                obj_name = 'users_locations',
+                                main_name = '',
+                                main_id = 'user_id',
+                                db_main_name = 'username',
+                                view_select_name = 'User',
+                                view_label = 'Locations'
+                            )
+    
+    else:
+        query = """
+                SELECT l.location_id, l.location_name, l.coordinates
+                FROM users_locations ul
+                JOIN users u ON ul.user_id = u.user_id
+                JOIN locations l ON ul.location_id = l.location_id
+                WHERE u.user_id = %s
+                """ % (user_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        selected_locations = cur.fetchall()
+
+        query2 = "SELECT username FROM users WHERE user_id = %s" % (user_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query2)
+        username = cur.fetchall()
+
+        query3 = "SELECT * FROM locations"
+        cur = mysql.connection.cursor()
+        cur.execute(query3)
+        all_locations = cur.fetchall()
+
+        return render_template('intersect_table.j2', 
+                                data = users,
+                                coverage = selected_locations,
+                                table_name = 'Users-Locations',
+                                obj_name = 'users_locations',
+                                main_name = username,
+                                main_id = 'user_id',
+                                db_main_name = 'username',
+                                view_select_name = 'User',
+                                view_label = 'Locations',
+
+                                Obj_Name = 'User-Location',
+                                assoc_id = 'location_id',
+                                ref_id = user_id,
+                                display_names = {
+                                    'Location ID': 'location_id',
+                                    'Location Name': 'location_name',
+                                    'Coordinates': 'coordinates'
+                                },
+                                assoc_name = 'Location',
+                                db_assoc_name = ['location_name'],
+                                all_assoc = all_locations
+                            )
+
+
+@app.route('/add_users_locations', methods=['POST'])
+def add_users_locations():
+    if request.method == 'POST':
+        if request.form.get("Add"):
+            user_id = request.form['user_id']
+            location_id = request.form['location_id']
+            query = "INSERT INTO users_locations (user_id, location_id) VALUES (%s, %s)"
+            cur = mysql.connection.cursor()
+            cur.execute(query, (user_id, location_id))
+            mysql.connection.commit()
+            return redirect(f"/users_locations/{user_id}")
+
+
+@app.route('/delete_users_locations/<int:user_id>/<int:location_id>', methods=['GET'])
+def delete_users_locations(user_id, location_id):
+    if request.method == 'GET':
+        query = "DELETE FROM users_locations WHERE user_id = %s AND location_id = %s"
+        cur = mysql.connection.cursor()
+        cur.execute(query, (user_id, location_id))
+        mysql.connection.commit()
+        return redirect(f"/users_locations/{user_id}")
+
+
+# -- CRUD: users_conditions --
+@app.route('/users_conditions/', defaults={'user_id': None})
+@app.route('/users_conditions/<int:user_id>', methods=['GET'])
+def show_users_conditions(user_id):
+    query = "SELECT * FROM users"
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    users = cur.fetchall()
+    if user_id is None:
+        return render_template('intersect_table.j2', 
+                                data = users,
+                                coverage = {},
+                                table_name = 'Users-Conditions',
+                                obj_name = 'users_conditions',
+                                main_name = '',
+                                main_id = 'user_id',
+                                db_main_name = 'username',
+                                view_select_name = 'User',
+                                view_label = 'Conditions'
+                            )
+    
+    else:
+        query = """
+                SELECT c.condition_id, c.condition_type, c.measurement_unit
+                FROM users_conditions uc
+                JOIN users u ON uc.user_id = u.user_id
+                JOIN conditions c ON uc.condition_id = c.condition_id
+                WHERE u.user_id = %s;
+                """ % (user_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        selected_conditions = cur.fetchall()
+
+        query2 = "SELECT username FROM users WHERE user_id = %s" % (user_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query2)
+        username = cur.fetchall()
+
+        query3 = "SELECT * FROM conditions"
+        cur = mysql.connection.cursor()
+        cur.execute(query3)
+        all_conditions = cur.fetchall()
+
+        return render_template('intersect_table.j2', 
+                                data = users,
+                                coverage = selected_conditions,
+                                table_name = 'Users-Conditions',
+                                obj_name = 'users_conditions',
+                                main_name = username,
+                                main_id = 'user_id',
+                                db_main_name = 'username',
+                                view_select_name = 'User',
+                                view_label = 'Conditions for User',
+
+                                Obj_Name = 'User-Condition',
+                                assoc_id = 'condition_id',
+                                ref_id = user_id,
+                                display_names = {
+                                    'Condition ID': 'condition_id',
+                                    'Condition Type': 'condition_type',
+                                    'Measurement Unit': 'measurement_unit'
+                                },
+                                assoc_name = 'Condition',
+                                db_assoc_name = ['condition_type'],
+                                all_assoc = all_conditions
+                            )
+
+
+@app.route('/add_users_conditions', methods=['POST'])
+def add_users_conditions():
+    if request.method == 'POST':
+        if request.form.get("Add"):
+            user_id = request.form['user_id']
+            condition_id = request.form['condition_id']
+            query = "INSERT INTO users_conditions (user_id, condition_id) VALUES (%s, %s)"
+            cur = mysql.connection.cursor()
+            cur.execute(query, (user_id, condition_id))
+            mysql.connection.commit()
+            return redirect(f"/users_conditions/{user_id}")
+
+
+@app.route('/delete_users_conditions/<int:user_id>/<int:condition_id>', methods=['GET'])
+def delete_users_conditions(user_id, condition_id):
+    if request.method == 'GET':
+        query = "DELETE FROM users_conditions WHERE user_id = %s AND condition_id = %s"
+        cur = mysql.connection.cursor()
+        cur.execute(query, (user_id, condition_id))
+        mysql.connection.commit()
+        return redirect(f"/users_conditions/{user_id}")
+
+
+# -- CRUD: stations_conditions --
+@app.route('/stations_conditions/', defaults={'station_id': None})
+@app.route('/stations_conditions/<int:station_id>', methods=['GET'])
+def show_stations_conditions(station_id):
+    query = "SELECT * FROM stations"
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    stations = cur.fetchall()
+    if station_id is None:
+        return render_template('intersect_table.j2', 
+                                data = stations,
+                                coverage = {},
+                                table_name = 'Stations-Conditions',
+                                obj_name = 'stations_conditions',
+                                main_name = '',
+                                main_id = 'station_id',
+                                db_main_name = 'station_name',
+                                view_select_name = 'Station',
+                                view_label = 'Conditions'
+                            )
+    
+    else:
+        query = """
+                SELECT sc.reading_id, c.condition_type, sc.condition_reading, c.measurement_unit, sc.wind_direction, sc.date_refreshed
+                FROM stations_conditions sc
+                JOIN stations s ON sc.station_id = s.station_id
+                JOIN conditions c ON sc.condition_id = c.condition_id
+                WHERE s.station_id = %s 
+                """ % (station_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        readings = cur.fetchall()
+
+        query2 = "SELECT station_name FROM stations WHERE station_id = %s" % (station_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query2)
+        station_name = cur.fetchall()
+
+        query3 = "SELECT * FROM conditions"
+        cur = mysql.connection.cursor()
+        cur.execute(query3)
+        all_conditions = cur.fetchall()
+
+        return render_template('intersect_table.j2', 
+                                data = stations,
+                                coverage = readings,
+                                table_name = 'Stations-Conditions',
+                                obj_name = 'stations_conditions',
+                                main_name = station_name,
+                                main_id = 'station_id',
+                                db_main_name = 'station_name',
+                                view_select_name = 'Station',
+                                view_label = 'Conditions',
+
+                                Obj_Name = 'Station-Condition',
+                                assoc_id = 'reading_id',
+                                ref_id = station_id,
+                                display_names = {
+                                    'Reading ID': 'reading_id',
+                                    'Condition Type': 'condition_type',
+                                    'Condition Reading': 'condition_reading',
+                                    'Measurement Unit': 'measurement_unit',
+                                    'Wind Direction': 'wind_direction',
+                                    'Date Refreshed': 'date_refreshed',
+                                },
+                                assoc_name = 'Reading',
+                                db_assoc_name = ['condition_type'],
+                                all_assoc = {}
+                            )
+
+
+@app.route('/add_stations_conditions', methods=['POST'])
+def add_stations_conditions():
+    if request.method == 'POST':
+        if request.form.get("Add"):
+            station_id = request.form['station_id']
+            reading_id = request.form['reading_id']
+            query = "INSERT INTO stations_conditions (station_id, reading_id) VALUES (%s, %s)"
+            cur = mysql.connection.cursor()
+            cur.execute(query, (station_id, reading_id))
+            mysql.connection.commit()
+            return redirect(f"/stations_conditions/{station_id}")
+
+
+@app.route('/delete_stations_conditions/<int:station_id>/<int:reading_id>', methods=['GET'])
+def delete_stations_conditions(station_id, reading_id):
+    if request.method == 'GET':
+        query = "DELETE FROM stations_conditions WHERE reading_id = %s"
+        cur = mysql.connection.cursor()
+        cur.execute(query, (reading_id,))
+        mysql.connection.commit()
+        return redirect(f"/stations_conditions/{station_id}")
 
 
 

@@ -48,11 +48,11 @@
           {% if data %}
           <th colspan="5">
             <form class="intersection-select" action="" method='GET'>
-              <label for="{{main_id}}">View {{view_name}}:</label>
+              <label for="{{main_id}}">View {{view_label}} for:</label>
               <select id="{{main_id}}" name="{{main_id}}" onchange="this.form.action='/{{obj_name}}/' + this.value; this.form.submit();">
-                <option value="" disabled selected>Select {{view_reference_name}}</option>
+                <option value="" disabled selected>Select {{view_select_name}}</option>
                 {% for item in data %}
-                  <option value="{{item[main_id]}}">{{item[db_view_main_name]}}</option>
+                  <option value="{{item[main_id]}}">{{item[db_main_name]}}</option>
                 {% endfor %}
               </select>
             </form>
@@ -63,14 +63,14 @@
       <tr>
         <!-- SELECTION TITLE -->
         {% if main_name %}
-          <th colspan="3"><h2 style="color: #00FFFF;">{{main_name[0][db_view_main_name]}}</h2></th>
-        {% endif %}
+          <th colspan="3"><h2 style="color: #00FFFF;">{{main_name[0][db_main_name]}}</h2></th>
+        
       </tr>
 
       <!-- TABLE HEADER -->
       <tr>
       {% if coverage %}
-          <th colspan="2"><input class="add-new-button" type="button" value="Add New Association" onClick="newEntry()"></th>
+          <th colspan="2"><input class="add-new-button" type="button" value="Add New" onClick="newEntry()"></th>
           {% for key, value in display_names.items() %}
           <th scope="col" data-field="{{ value }}" data-filter-control="input">{{ key }}</th>
           {% endfor %}
@@ -82,13 +82,22 @@
         {% for item in coverage %}
           <tr>
             <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[assoc_id] }}" class="table-button">Edit</a></td>
-            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_view_main_name]}}', '{{item[db_assoc_name[1]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
+            {% if db_assoc_name|length > 1 %}
+            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_main_name]}}', '{{item[db_assoc_name[1]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
+            {% else %}
+            <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ ref_id }}', '{{ item[assoc_id] }}', '{{main_name[0][db_main_name]}}', '{{item[db_assoc_name[0]]}}', '{{Obj_Name}}')" class="table-button">Delete</a></td>
+            {% endif %}
             {% for key in item.keys() %}
               <td align="right">{{ item[key] }}</td>
             {% endfor %}
           </tr>
         {% endfor %}
       </tbody>
+      {% else %}
+      <tr><th>No {{assoc_name}}s</th></tr>
+      <tr><th><input class="add-new-button" type="button" value="Add New" onClick="newEntry()"></th></tr>
+
+      {% endif %}
       {% endif %}
 {% endif %}
 
@@ -99,10 +108,9 @@
 
 <!-- ADD NEW VALUE FORM -->
 <div id="insert" class="add-box" style="display: none;">
-
-  {% if coverage %}
+  {% if main_name %}
   <form action="/add_{{obj_name}}" method="POST">
-    <legend><strong>Add a {{assoc_name}} that covers {{main_name[0][db_view_main_name]}}</strong></legend>
+    <legend><strong>Add a {{assoc_name}} for {{main_name[0][db_main_name]}}</strong></legend>
     <input type="hidden" name="{{main_id}}" value="{{ref_id}}">
 
     <!-- SELECTION -->
@@ -127,6 +135,12 @@
     <input class="cancel-button" type="button" value="Cancel" onClick="browseEntries()"> 
     </form>
     {% endif %}
+
+
+    <!-- Stations-Conditions FORM ONLY-->
+
+    <!-- END Stations-Conditions FORM -->
+
 </div>
 
 
@@ -174,7 +188,7 @@
   function updateEntry(pid) { showform('update'); }
 
   function deleteEntry(mainItemID, assocItemID, mainItemName, assocItemName, tableName) { 
-    if (confirm(`Confirm removal ${tableName} association: ${assocItemName} from ${mainItemName}?`)) {
+    if (confirm(`Confirm removal of ${tableName} association: ${assocItemName} from ${mainItemName}?`)) {
       window.location.href = `/delete_{{obj_name}}/${mainItemID}/${assocItemID}`;
     }
   }
