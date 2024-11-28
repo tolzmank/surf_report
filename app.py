@@ -743,7 +743,8 @@ def show_stations_conditions(station_id):
                                 },
                                 assoc_name = 'Reading',
                                 db_assoc_name = ['condition_type'],
-                                all_assoc = {}
+                                all_assoc = {},
+                                all_conditions = all_conditions
                             )
 
 
@@ -752,10 +753,13 @@ def add_stations_conditions():
     if request.method == 'POST':
         if request.form.get("Add"):
             station_id = request.form['station_id']
-            reading_id = request.form['reading_id']
-            query = "INSERT INTO stations_conditions (station_id, reading_id) VALUES (%s, %s)"
+            condition_id = request.form['condition_id']
+            condition_reading = request.form['condition_reading']
+            wind_direction = request.form['wind_direction']
+            date_refreshed = request.form['date_refreshed']
+            query = "INSERT INTO stations_conditions (station_id, condition_id, condition_reading, wind_direction, date_refreshed) VALUES (%s, %s, %s, %s, %s)"
             cur = mysql.connection.cursor()
-            cur.execute(query, (station_id, reading_id))
+            cur.execute(query, (station_id, condition_id, condition_reading, wind_direction, date_refreshed))
             mysql.connection.commit()
             return redirect(f"/stations_conditions/{station_id}")
 
@@ -768,6 +772,41 @@ def delete_stations_conditions(station_id, reading_id):
         cur.execute(query, (reading_id,))
         mysql.connection.commit()
         return redirect(f"/stations_conditions/{station_id}")
+
+
+@app.route('/update_stations_conditions/<int:reading_id>/<int:station_id>', methods=['POST', 'GET'])
+def update_stations_conditions(reading_id, station_id):
+    if request.method == "GET":
+        query = "SELECT * FROM stations_conditions WHERE reading_id = %s" % (reading_id)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        reading = cur.fetchall()
+        return render_template("intersect_table_update.j2", 
+                               reading=reading,
+                               station_id = station_id
+                               )
+
+
+    if request.method == "POST":
+        if request.form.get("Update"):
+            reading_id = request.form['reading_id']
+            condition_id = request.form['condition_id']
+            condition_reading = request.form['condition_reading']
+            wind_direction = request.form['wind_direction']
+            date_refreshed = request.form['date_refreshed']
+            query = """
+                UPDATE stations_conditions 
+                SET stations_conditions.condition_id = %s, 
+                    stations_conditions.condition_reading = %s,
+                    stations_conditions.wind_direction = %s,
+                    stations_conditions.date_refreshed = %s,
+                WHERE stations_conditions.reading_id = %s
+                """
+            cur = mysql.connection.cursor()
+            cur.execute(query, (condition_id, condition_reading, wind_direction, date_refreshed))
+            mysql.connection.commit()
+            return redirect(f"/stations_conditions/{station_id}")
+
 
 
 
