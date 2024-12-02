@@ -83,7 +83,7 @@ CREATE TABLE stations_conditions (
     condition_id int NOT NULL,
     condition_reading decimal(5,2) NOT NULL,
     wind_direction varchar(10),
-    date_refreshed DATE,
+    date_refreshed DATETIME,
     PRIMARY KEY (reading_id),
     FOREIGN KEY (station_id) REFERENCES stations(station_id)
         ON DELETE CASCADE,

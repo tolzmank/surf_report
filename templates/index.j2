@@ -33,34 +33,91 @@
   </div>
 
 
-<!-- SELECT USER REPORT -->
- <div class="select-user-menu">
-  <form action="" method="GET">
 
-    <label for="user">Get Surf Report for:</label>
-    <select id="user_id" name="user_id" onchange="this.form.action='/' + this.value; this.form.submit();">
-      <option value="" disable selected>Select User</option>
-    {% for user in users %}
-      <option value="{{ user['user_id'] }}">{{user['username']}}</option>
-    {% endfor %}
-    </select>
+{% if users %}
+<table border="1" cellpadding="5">
+<thead>
 
-  </form>
- </div>
+  <!-- SELECT USER REPORT -->
+  <tr>
+    <th colspan="5">
+      <form action="" method="GET">
+        <label for="user">Get Surf Report for:</label>
+        <select id="user_id" name="user_id" onchange="this.form.action='/' + this.value; this.form.submit();">
+          <option value="" disable selected>Select User</option>
+        {% for user in users %}
+          <option value="{{ user['user_id'] }}">{{user['username']}}</option>
+        {% endfor %}
+        </select>
+      </form>
+    </th>
+  </tr>
+  
+  
+    <!-- SURF REPORT -->
+    <tr>
+    {% if user_id %}
+      <th colspan="3">
+        <h2>
+          <span style="color: #00FFFF;">Surf Report for </span>
+          <span style="color: white;">{{user['username']}}</span>
+        </h2>
+      </th>
+      </tr>
+</thead>
+
+<!-- LIST OF LOCATIONS and CONDITIONS -->
+
+{% for location in locations %}
+<table>
+<thead>
+  <!-- LOCATION NAME-->
+  <tr>
+      <th colspan="4" style="color: #00FFFF;">{{location['location_name']}}</th>
+      <th colspan="1" style="text-align: right; color: rgb(182, 182, 182);" >Refreshed</th>
+  </tr>
+</thead>
+
+<tbody>
+  <!-- CONDITIONS -->
+  {% for item in report %}
+    {% if item['location_name'] == location['location_name'] %}
+
+    <tr>
+        {% for key, value in display_names.items() %}
+        {% if value == 'condition_type' %}
+          <th style="width: 110px;">{{item[value]}}: </th>
+        {% elif item[value] %}
+          {% if value != 'date_refreshed' %}
+            <td style="width: 35px;">{{item[value]}}</td>
+
+          {% else %}
+            <td style="width: calc(100% - 145px); color: rgb(182, 182, 182); text-align: right;">{{item[value]}}</td>
+          {% endif %}
+        {% else %}
+          <td></td>
+        {% endif %}
+        {% endfor %}
+      </tr>
+
+    {% endif %}
+  {% endfor %}
+
+</tbody>
 
 </table>
-<p>&nbsp;</p>
+{% endfor %}
+
+
+
+{% endif %}
+</table>
 </div>
 
 
-<!-- SURF REPORT -->
-<div id="browse" class="report_window">
+{% endif %}
+  </table>
 
-  {% if user_id %}
-  <p>Surf Report for user_id: {{user_id}}</p>
-  {% endif %}
-
-   </div>
 
 
 <script src="../static/scripts.js"></script>

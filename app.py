@@ -36,9 +36,53 @@ def root(user_id):
                                 user_id = None
                                 )
         else:
+            query = "SELECT * FROM users WHERE user_id = %s" % (user_id)
+            cur = mysql.connection.cursor()
+            cur.execute(query)
+            user = cur.fetchall()
+
+            query2 = """
+                    SELECT location_name FROM locations WHERE location_id IN 
+                    (SELECT location_id FROM users_locations WHERE user_id = %s)
+                    """ % (user_id)
+            cur = mysql.connection.cursor()
+            cur.execute(query2)
+            locations = cur.fetchall()
+
+            query3 = """
+                    SELECT
+                        l.location_name,
+                        sc.condition_reading,
+                        c.condition_type,
+                        c.measurement_unit,
+                        sc.wind_direction,
+                        sc.date_refreshed
+                    FROM users_locations ul
+                    JOIN locations l ON ul.location_id = l.location_id
+                    JOIN locations_stations ls ON l.location_id = ls.location_id
+                    JOIN stations_conditions sc ON ls.station_id = sc.station_id
+                    JOIN conditions c ON sc.condition_id = c.condition_id
+                    WHERE ul.user_id = %s
+                    """ % (user_id)
+            cur = mysql.connection.cursor()
+            cur.execute(query3)
+            report = cur.fetchall()
+
+
             return render_template('index.j2',
-                                   users = users,
-                                   user_id = user_id
+                                    users = users,
+                                    user_id = user_id,
+                                    user = user[0],
+                                    locations = locations,
+                                    display_names = {
+                                        'Condition Type': 'condition_type',
+                                        'Condition Reading': 'condition_reading',
+                                        'Measurement Unit': 'measurement_unit',
+                                        'Wind Direction': 'wind_direction',
+                                        'Date Refreshed': 'date_refreshed',
+                                    },
+                                    report = report
+
                                    )
 
 
@@ -49,18 +93,19 @@ def get_report():
     if request.form.get("Get_Report"):
         user_id = request.form["user_id"]
         query = """
-        SELECT
-            l.location_name,
-            sc.condition_reading,
-            c.condition_type,
-            c.measurement_unit,
-            sc.wind_direction
-        FROM users_locations ul
-        JOIN locations l ON ul.location_id = l.location_id
-        JOIN locations_stations ls ON l.location_id = ls.location_id
-        JOIN stations_conditions sc ON ls.station_id = sc.station_id
-        JOIN conditions c ON sc.condition_id = c.condition_id
-        WHERE ul.user_id = %s"""
+                SELECT
+                    l.location_name,
+                    sc.condition_reading,
+                    c.condition_type,
+                    c.measurement_unit,
+                    sc.wind_direction
+                FROM users_locations ul
+                JOIN locations l ON ul.location_id = l.location_id
+                JOIN locations_stations ls ON l.location_id = ls.location_id
+                JOIN stations_conditions sc ON ls.station_id = sc.station_id
+                JOIN conditions c ON sc.condition_id = c.condition_id
+                WHERE ul.user_id = %s
+                """
         cur = mysql.connection.cursor()
         cur.execute(query, (user_id,))
         surf_report = cur.fetchall()
@@ -295,8 +340,7 @@ def update_station(station_id):
                                 'ID': 'station_id',
                                 'Station Code': 'station_code',
                                 'Station Name': 'station_name',
-                                'Station URL': 'station_url',
-                                'Date Refreshed': 'date_refreshed'
+                                'Station URL': 'station_url'
                             }
                                )
 
