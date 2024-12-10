@@ -1,3 +1,13 @@
+# 1 - Citation for this file: app.py
+# 2 - Date: 10/01/2024
+# 3 - Adapted from the CS340 starter code
+# 4 - Copied and used the CS340 Flask app starter code as a starting point
+#    for my app.py code file.
+#    Modified the database connection info to direct to my SQL database I created.
+#    Used the overall structure of defining routes and structing queries as a 
+#    general starting point for building/serving my pages.
+# 5 - Source URL: https://github.com/osu-cs340-ecampus/flask-starter-app/blob/master/bsg_people_app/app.py
+
 
 from flask import Flask, render_template, redirect, jsonify
 from flask_mysqldb import MySQL
@@ -7,7 +17,7 @@ import os
 
 app = Flask(__name__)
 
-# database connection info
+# Database connection info
 app.config["MYSQL_HOST"] = "classmysql.engr.oregonstate.edu"
 app.config["MYSQL_USER"] = "cs340_tolzmank"
 app.config["MYSQL_PASSWORD"] = "1874"
@@ -17,25 +27,29 @@ app.config["MYSQL_CURSORCLASS"] = "DictCursor"
 mysql = MySQL(app)
 
 
-# Routes
+# ROUTES
+# HOME PAGE
 @app.route('/', defaults={'user_id': None})
 @app.route('/<int:user_id>', methods=['GET'])
 def root(user_id):
+        # Home page loads with user selection
         try:
             query = "SELECT * FROM users"
             cur = mysql.connection.cursor()
             cur.execute(query)
             users = cur.fetchall()
         except Exception as e:
-            print(f"MySQL connect FAILED: {e}")
+            print(f"MySQL Connection Failed: {e}")
             return "<h1>Failed to connect to MySQL</h1>"
         
+        # No user has been selected yet
         if user_id is None:
             return render_template('index.j2', 
                                 users = users,
                                 user_id = None
                                 )
         else:
+            # User has been selected
             query = "SELECT * FROM users WHERE user_id = %s" % (user_id)
             cur = mysql.connection.cursor()
             cur.execute(query)
@@ -48,7 +62,8 @@ def root(user_id):
             cur = mysql.connection.cursor()
             cur.execute(query2)
             locations = cur.fetchall()
-
+            
+            # Get stations conditions reading for user
             query3 = """
                     SELECT
                         l.location_name,
@@ -62,13 +77,15 @@ def root(user_id):
                     JOIN locations_stations ls ON l.location_id = ls.location_id
                     JOIN stations_conditions sc ON ls.station_id = sc.station_id
                     JOIN conditions c ON sc.condition_id = c.condition_id
+                    JOIN users_conditions uc ON c.condition_id = uc.condition_id
                     WHERE ul.user_id = %s
                     """ % (user_id)
             cur = mysql.connection.cursor()
             cur.execute(query3)
             report = cur.fetchall()
 
-
+            # Assign variable names from queries for page render
+            # Include additional info for page template for render
             return render_template('index.j2',
                                     users = users,
                                     user_id = user_id,
@@ -82,35 +99,7 @@ def root(user_id):
                                         'Date Refreshed': 'date_refreshed',
                                     },
                                     report = report
-
                                    )
-
-
-
-# -- GET REPORT for USER --
-@app.route('/report', methods=['POST'])
-def get_report():
-    if request.form.get("Get_Report"):
-        user_id = request.form["user_id"]
-        query = """
-                SELECT
-                    l.location_name,
-                    sc.condition_reading,
-                    c.condition_type,
-                    c.measurement_unit,
-                    sc.wind_direction
-                FROM users_locations ul
-                JOIN locations l ON ul.location_id = l.location_id
-                JOIN locations_stations ls ON l.location_id = ls.location_id
-                JOIN stations_conditions sc ON ls.station_id = sc.station_id
-                JOIN conditions c ON sc.condition_id = c.condition_id
-                WHERE ul.user_id = %s
-                """
-        cur = mysql.connection.cursor()
-        cur.execute(query, (user_id,))
-        surf_report = cur.fetchall()
-        print(surf_report)
-        return render_template('report.j2', surf_report = surf_report)
 
 
 # MAIN TABLES
@@ -121,6 +110,7 @@ def show_users():
     cur = mysql.connection.cursor()
     cur.execute(query)
     users = cur.fetchall()
+    # Assign variable names for query,
     return render_template('table.j2', 
                             data = users,
                             table_name = 'Users',
@@ -235,7 +225,6 @@ def add_location():
 @app.route('/update_location/<int:location_id>', methods=['POST', 'GET'])
 def update_location(location_id):
     if request.method == "GET":
-        # mySQL query to grab the info of the person with our passed id
         query = "SELECT * FROM locations WHERE location_id = %s" % (location_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
@@ -256,20 +245,16 @@ def update_location(location_id):
 
 
     if request.method == "POST":
-        # fire off if user clicks the 'Edit Person' button
         if request.form.get("Update_Location"):
-            # grab user form inputs
             location_id = request.form["location_id"]
             location_name = request.form["location_name"]
             coordinates = request.form["coordinates"]
 
-            # no null inputs
             query = "UPDATE locations SET locations.location_name = %s, locations.coordinates = %s WHERE locations.location_id = %s"
             cur = mysql.connection.cursor()
             cur.execute(query, (location_name, coordinates, location_id))
             mysql.connection.commit()
 
-            # redirect back to people page after we execute the update query
             return redirect("/locations")
 
 
@@ -313,10 +298,9 @@ def add_station():
             station_code = request.form['station_code']
             station_name = request.form['station_name']
             station_url = request.form['station_url']
-            date_refreshed = request.form['date_refreshed']
-            query = "INSERT INTO stations (station_code, station_name, station_url, date_refreshed) VALUES (%s, %s, %s, %s)"
+            query = "INSERT INTO stations (station_code, station_name, station_url) VALUES (%s, %s, %s)"
             cur = mysql.connection.cursor()
-            cur.execute(query, (station_code, station_name, station_url, date_refreshed))
+            cur.execute(query, (station_code, station_name, station_url))
             mysql.connection.commit()
         return redirect("/stations")
 
@@ -324,7 +308,6 @@ def add_station():
 @app.route('/update_station/<int:station_id>', methods=['POST', 'GET'])
 def update_station(station_id):
     if request.method == "GET":
-        # mySQL query to grab the info of the person with our passed id
         query = "SELECT * FROM stations WHERE station_id = %s" % (station_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
@@ -346,22 +329,16 @@ def update_station(station_id):
 
 
     if request.method == "POST":
-        # fire off if user clicks the 'Edit Person' button
         if request.form.get("Update_Station"):
-            # grab user form inputs
             station_id = request.form["station_id"]
             station_code = request.form["station_code"]
             station_name = request.form["station_name"]
             station_url = request.form["station_url"]
-            date_refreshed = request.form["date_refreshed"]
 
-            # no null inputs
-            query = "UPDATE stations SET stations.station_code = %s, stations.station_name = %s, stations.station_url = %s, stations.date_refreshed = %s WHERE stations.station_id = %s"
+            query = "UPDATE stations SET stations.station_code = %s, stations.station_name = %s, stations.station_url = %s WHERE stations.station_id = %s"
             cur = mysql.connection.cursor()
-            cur.execute(query, (station_code, station_name, station_url, date_refreshed, station_id))
+            cur.execute(query, (station_code, station_name, station_url, station_id))
             mysql.connection.commit()
-
-            # redirect back to people page after we execute the update query
             return redirect("/stations")
 
 
@@ -904,4 +881,4 @@ def update_stations_conditions(reading_id, station_id):
 # Listener
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 3181)) 
-    app.run(port=port, debug=True)
+    app.run(port=port)

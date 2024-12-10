@@ -50,10 +50,16 @@ h2 {
     background-color: #868686;
     border-radius: 20px;
     padding: 8px;
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap to the next line */
+    gap: 5px; /* Maintains space between items */
   }
 
   .navbar ul li {
     display: inline;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 2px;
   }
 
   .navbar a {
@@ -107,6 +113,24 @@ a:hover {
 .table-button:hover {
     text-decoration: none;
     background-color: #00ffff;
+}
+
+.table-button-delete {
+    text-decoration: none;
+    color: black;
+    background-color: #d08a8a;
+    border-radius: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.table-button-delete:hover {
+    text-decoration: none;
+    background-color: #d26e6e;
 }
 
 .add-new-button {
@@ -291,3 +315,4 @@ form button:hover {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
     color: white;
 }
+

@@ -5,13 +5,14 @@
 <link href="/static/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body onload="browseEntries()">
+<!-- All template pages use variable names instead of hardcoded text to populate template -->
 
   
 <!-- PAGE TITLE / TABLE NAME -->
- <div class="page-title">
-  <h1>Surf Conditions Reporter Database</h1>
-  <h2>{{table_name}}</h2>
- </div>
+  <div class="page-title">
+    <h1>Surf Conditions Reporter Database</h1>
+    <h2>{{table_name}}</h2>
+  </div>
 
 
 <!-- NAV BAR -->
@@ -33,6 +34,7 @@
     </ul>
   </div>
 
+
 <!-- DISPLAY TABLE -->
 <div id="browse">
 <table border="1" cellpadding="5">
@@ -52,13 +54,20 @@
 
 <!-- TABLE VALUES -->
     <tbody>
+      <!-- iterates over variables from Flask app render -->
       {% for item in data %}
         <tr>
           <td class="fixed-width"><a href="update_{{obj_name}}/{{ item[id] }}" class="table-button">Edit</a></td>
-          <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ item[id] }}', '{{ item[main_name] }}')" class="table-button">Delete</a></td>
+          <td class="fixed-width"><a href="#" onclick="return deleteEntry('{{ item[id] }}', '{{ item[main_name] }}')" class="table-button-delete">Delete</a></td>
           
           {% for key in item.keys() %}
-            <td align="right">{{ item[key] }}</td>  
+            {% if key == 'coordinates' %}
+              <td align="right"><a href="https://www.google.com/maps?q={{ item[key] }}" target="_blank">{{ item[key] }}</a></td>
+            {% elif key == 'station_url' %}
+              <td align="right"><a href="{{ item[key] }}" target="_blank">{{ item[key] }}</a></td>
+            {% else %}
+              <td align="right">{{ item[key] }}</td>
+            {% endif %}
           {% endfor %}
         </tr>
       {% endfor %}
@@ -66,22 +75,46 @@
     {% endif %}
 
 </table>
-<p>&nbsp;</p>
 </div>
 
 
 <!-- ADD NEW VALUE FORM -->
 <div id="insert" class="add-box" style="display: none;">
-  <!-- form to INSERT new data into users-->
   <form id="insert{{Obj_Name}}" action="/add_{{obj_name}}" method="POST">
     <legend><strong>Enter {{Obj_Name}} Details</strong></legend>
 
     {% for key, value in display_names.items() %}
     {% if key != 'ID' %}
+      {% if value == 'email' %}
+      <fieldset>
+        <label for="{{value}}">{{key}}:</label>
+        <input type="email" class="form-control" id="{{value}}" name="{{value}}" placeholder="surfer@email.com" required>
+      </fieldset>
+      
+      {% elif value == 'coordinates' %}
+      <fieldset>
+        <label for="{{value}}">{{key}}:</label>
+        <input type="text" class="form-control" id="{{value}}" name="{{value}}" placeholder="ex: 20.5 N, 157.9 W" required>
+      </fieldset>
+
+      {% elif value == 'station_url' %}
+      <fieldset>
+        <label for="{{value}}">{{key}}:</label>
+        <input type="url" class="form-control" id="{{value}}" name="{{value}}" value ="http://www." placeholder="" required>
+      </fieldset>
+
+      {% elif value == 'measurement_unit' %}
+      <fieldset>
+        <label for="{{value}}">{{key}}:</label>
+        <input type="text" class="form-control" id="{{value}}" name="{{value}}" placeholder="ft, sec, kts..." required>
+      </fieldset>
+
+      {% else %}
       <fieldset>
         <label for="{{value}}">{{key}}:</label>
         <input type="text" class="form-control" id="{{value}}" name="{{value}}" placeholder="" required>
       </fieldset>
+      {% endif %}
     {% endif %}
     {% endfor %}
 
@@ -95,6 +128,23 @@
 
   function showform(dowhat) {
     /*
+    * 1 - Citation for this function:
+    * 2 - Date: 10/01/2024
+    * 3 - Adapted from the starter code.
+    * 4 - Copied and used this starter code as a starting point
+    *     for my project. 
+    * 
+    *     Changed the names of the individual entities
+    *     to a generic 'Entry' to make my templating design easier.
+    * 
+    *     Modified the deleteEntry() function to serve as a 
+    *     confirmation window.
+    * 
+    *     The rest is basically the same as the starter code.
+    * 
+    * 5 - Source URL: https://github.com/osu-cs340-ecampus/flask-starter-app/tree/master/bsg_people_app
+    * 6 - This function is used to reveal or hide forms in my table pages that are
+    *     initially hidden by changing the display from 'none' to 'block'
     * four DIVS: browse, insert, update, delete
     * this function sets one visible the others not
     */
@@ -132,6 +182,7 @@
   function newEntry() { showform('insert'); }
   function updateEntry(pid) { showform('update'); }
 
+  // DELETE CONFIRM WINDOW
   function deleteEntry(itemId, itemName) { 
     if (confirm(`Are you sure you want to delete: ${itemName}?`)) {
       window.location.href = `/delete_{{obj_name}}/${itemId}`;
@@ -141,8 +192,7 @@
   function browseEntries() { showform ('browse'); }
   function showAll() { showform ('all'); }
 
-
-
 </script>
+<p style="text-align: center; font-size: 12px; color: gray;">© Group 1: Kent Tolzmann, Ryan Messenger</p>
 </body>
 </html>
