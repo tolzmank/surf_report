@@ -84,8 +84,7 @@ def root(user_id):
             cur.execute(query3)
             report = cur.fetchall()
 
-            # Assign variable names from queries for page render
-            # Include additional info for page template for render
+            # Include additional info for template render
             return render_template('index.j2',
                                     users = users,
                                     user_id = user_id,
@@ -110,7 +109,8 @@ def show_users():
     cur = mysql.connection.cursor()
     cur.execute(query)
     users = cur.fetchall()
-    # Assign variable names for query,
+
+    # Include additional info for template render
     return render_template('table.j2', 
                             data = users,
                             table_name = 'Users',
@@ -122,8 +122,7 @@ def show_users():
                                 'ID': 'user_id',
                                 'Username': 'username',
                                 'Email': 'email'
-                                }
-                           )
+                                })
 
 
 @app.route('/add_user', methods=['POST'])
@@ -132,6 +131,7 @@ def add_user():
         if request.form.get("Add_User"):
             username = request.form['username']
             email = request.form['email']
+            
             query = "INSERT INTO users (username, email) VALUES (%s, %s)"
             cur = mysql.connection.cursor()
             cur.execute(query, (username, email))
@@ -141,11 +141,14 @@ def add_user():
 
 @app.route('/update_user/<int:user_id>', methods=['POST', 'GET'])
 def update_user(user_id):
+    # Loads user update page with populated fields from user id
     if request.method == "GET":
         query = "SELECT * FROM users WHERE user_id = %s" % (user_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
         user = cur.fetchall()
+
+        # Include additional info for template render
         return render_template("table_update.j2", 
                                 item_data = user,
                                 table_name = 'Users',
@@ -158,9 +161,9 @@ def update_user(user_id):
                                     'ID': 'user_id',
                                     'Username': 'username',
                                     'Email': 'email'
-                                    }
-                               )
+                                    })
 
+    # Executes update operation, redirect to displaying users
     if request.method == "POST":
         if request.form.get("Update_User"):
             user_id = request.form["user_id"]
@@ -194,6 +197,8 @@ def show_locations():
     cur = mysql.connection.cursor()
     cur.execute(query)
     locations = cur.fetchall()
+
+    # Include additional info for template render
     return render_template('table.j2', 
                             data=locations,
                             table_name = 'Locations',
@@ -205,8 +210,7 @@ def show_locations():
                                 'ID': 'location_id',
                                 'Location Name': 'location_name', 
                                 'Coordinates': 'coordinates'
-                            }
-                           )
+                            })
 
 
 @app.route('/add_location', methods=['POST'])
@@ -215,6 +219,7 @@ def add_location():
         if request.form.get("Add_Location"):
             location_name = request.form['location_name']
             coordinates = request.form['coordinates']
+            
             query = "INSERT INTO locations (location_name, coordinates) VALUES (%s, %s)"
             cur = mysql.connection.cursor()
             cur.execute(query, (location_name, coordinates))
@@ -224,11 +229,14 @@ def add_location():
 
 @app.route('/update_location/<int:location_id>', methods=['POST', 'GET'])
 def update_location(location_id):
+    # Loads location update page with populated fields from location id
     if request.method == "GET":
         query = "SELECT * FROM locations WHERE location_id = %s" % (location_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
         location = cur.fetchall()
+
+        # Include additional info for template render
         return render_template("table_update.j2", 
                                 item_data = location,
                                 table_name = 'Locations',
@@ -240,21 +248,19 @@ def update_location(location_id):
                                     'ID': 'location_id',
                                     'Location Name': 'location_name',
                                     'Coordinates': 'coordinates'
-                                    }
-                               )
+                                })
 
-
+    # Executes update operation, redirect to displaying locations
     if request.method == "POST":
         if request.form.get("Update_Location"):
             location_id = request.form["location_id"]
             location_name = request.form["location_name"]
             coordinates = request.form["coordinates"]
-
+            
             query = "UPDATE locations SET locations.location_name = %s, locations.coordinates = %s WHERE locations.location_id = %s"
             cur = mysql.connection.cursor()
             cur.execute(query, (location_name, coordinates, location_id))
             mysql.connection.commit()
-
             return redirect("/locations")
 
 
@@ -268,6 +274,7 @@ def delete_location(location_id):
         return redirect("/locations")
 
 
+
 # -- CRUD: stations --
 @app.route('/stations', methods=['GET'])
 def show_stations():
@@ -275,6 +282,8 @@ def show_stations():
     cur = mysql.connection.cursor()
     cur.execute(query)
     stations = cur.fetchall()
+
+    # Include additional info for template render
     return render_template('table.j2', 
                             data = stations,
                             table_name = 'Stations',
@@ -287,8 +296,7 @@ def show_stations():
                                 'Station Code': 'station_code',
                                 'Station Name': 'station_name',
                                 'Station URL': 'station_url'
-                            }
-                           )
+                            })
 
 
 @app.route('/add_station', methods=['POST'])
@@ -298,6 +306,7 @@ def add_station():
             station_code = request.form['station_code']
             station_name = request.form['station_name']
             station_url = request.form['station_url']
+            
             query = "INSERT INTO stations (station_code, station_name, station_url) VALUES (%s, %s, %s)"
             cur = mysql.connection.cursor()
             cur.execute(query, (station_code, station_name, station_url))
@@ -307,11 +316,15 @@ def add_station():
 
 @app.route('/update_station/<int:station_id>', methods=['POST', 'GET'])
 def update_station(station_id):
+
+    # Loads station update page with populated fields from station id
     if request.method == "GET":
         query = "SELECT * FROM stations WHERE station_id = %s" % (station_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
         station = cur.fetchall()
+        
+        # Include additional info for template render
         return render_template("table_update.j2", 
                             item_data = station,
                             table_name = 'Stations',
@@ -324,10 +337,9 @@ def update_station(station_id):
                                 'Station Code': 'station_code',
                                 'Station Name': 'station_name',
                                 'Station URL': 'station_url'
-                            }
-                               )
+                            })
 
-
+    # Executes update operation, redirect to displaying users
     if request.method == "POST":
         if request.form.get("Update_Station"):
             station_id = request.form["station_id"]
@@ -352,6 +364,7 @@ def delete_station(station_id):
         return redirect("/stations")
 
 
+
 # -- CRUD: conditions --
 @app.route('/conditions', methods=['GET'])
 def show_conditions():
@@ -370,8 +383,7 @@ def show_conditions():
                                 'ID': 'condition_id',
                                 'Condition Type': 'condition_type',
                                 'Measurement Unit': 'measurement_unit',
-                            }
-                           )
+                            })
 
 
 @app.route('/add_condition', methods=['POST'])
@@ -389,11 +401,14 @@ def add_condition():
 
 @app.route('/update_condition/<int:condition_id>', methods=['POST', 'GET'])
 def update_condition(condition_id):
+    # Loads condition update page with populated fields from condition id
     if request.method == "GET":
         query = "SELECT * FROM conditions WHERE condition_id = %s" % (condition_id)
         cur = mysql.connection.cursor()
         cur.execute(query)
         condition = cur.fetchall()
+
+        # Include additional info for template render
         return render_template("table_update.j2",                             
                                 item_data = condition,
                                 table_name = 'Conditions',
@@ -407,7 +422,7 @@ def update_condition(condition_id):
                                     'Measurement Unit': 'measurement_unit',
                             })
 
-
+    # Executes update operation, redirect to displaying conditions
     if request.method == "POST":
         if request.form.get("Update_Condition"):
             condition_id = request.form["condition_id"]
@@ -427,8 +442,8 @@ def delete_condition(condition_id):
         cur = mysql.connection.cursor()
         cur.execute(query, (condition_id,))
         mysql.connection.commit()
-
         return redirect("/conditions")
+
 
 
 # INTERSECTION TABLES
@@ -441,6 +456,8 @@ def show_locations_stations(location_id):
     cur.execute(query)
     locations = cur.fetchall()
     if location_id is None:
+        # Page loads, no location has been selected yet
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = locations,
                                 coverage = {},
@@ -454,6 +471,7 @@ def show_locations_stations(location_id):
                             )
     
     else:
+        # Location has been selected, get station coverage, re-render page
         query = """
                 SELECT s.station_id, s.station_code, s.station_name, s.station_url
                 FROM locations_stations ls
@@ -475,6 +493,7 @@ def show_locations_stations(location_id):
         cur.execute(query3)
         all_stations = cur.fetchall()
 
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = locations,
                                 coverage = station_coverage,
@@ -485,7 +504,6 @@ def show_locations_stations(location_id):
                                 db_main_name = 'location_name',
                                 view_select_name = 'Location',
                                 view_label = 'Station Coverage',
-
                                 Obj_Name = 'Location-Station',
                                 assoc_id = 'station_id',
                                 ref_id = location_id,
@@ -534,6 +552,8 @@ def show_users_locations(user_id):
     cur.execute(query)
     users = cur.fetchall()
     if user_id is None:
+        # Page loads, no user has been selected yet
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = users,
                                 coverage = {},
@@ -547,6 +567,7 @@ def show_users_locations(user_id):
                             )
     
     else:
+        # User selected, get locations for user, re-render page
         query = """
                 SELECT l.location_id, l.location_name, l.coordinates
                 FROM users_locations ul
@@ -568,6 +589,7 @@ def show_users_locations(user_id):
         cur.execute(query3)
         all_locations = cur.fetchall()
 
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = users,
                                 coverage = selected_locations,
@@ -625,6 +647,8 @@ def show_users_conditions(user_id):
     cur.execute(query)
     users = cur.fetchall()
     if user_id is None:
+        # Page loads, no user has been selected yet
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = users,
                                 coverage = {},
@@ -638,6 +662,7 @@ def show_users_conditions(user_id):
                             )
     
     else:
+        # User selected, get conditions for user, re-render page
         query = """
                 SELECT c.condition_id, c.condition_type, c.measurement_unit
                 FROM users_conditions uc
@@ -659,6 +684,7 @@ def show_users_conditions(user_id):
         cur.execute(query3)
         all_conditions = cur.fetchall()
 
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = users,
                                 coverage = selected_conditions,
@@ -716,6 +742,8 @@ def show_stations_conditions(station_id):
     cur.execute(query)
     stations = cur.fetchall()
     if station_id is None:
+        # No station selected yet
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = stations,
                                 coverage = {},
@@ -729,6 +757,7 @@ def show_stations_conditions(station_id):
                             )
     
     else:
+        # Station selected, get condition readings for station, re-render page
         query = """
                 SELECT sc.reading_id, c.condition_type, sc.condition_reading, c.measurement_unit, sc.wind_direction, sc.date_refreshed
                 FROM stations_conditions sc
@@ -750,6 +779,7 @@ def show_stations_conditions(station_id):
         cur.execute(query3)
         all_conditions = cur.fetchall()
 
+        # Include additional info for template render
         return render_template('intersect_table.j2', 
                                 data = stations,
                                 coverage = readings,
@@ -813,6 +843,8 @@ def delete_stations_conditions(station_id, reading_id):
 
 @app.route('/update_stations_conditions/<int:reading_id>/<int:station_id>', methods=['POST', 'GET'])
 def update_stations_conditions(reading_id, station_id):
+
+    # Loads stations-conditions page with populated fields from reading id
     if request.method == "GET":
         query = "SELECT * FROM stations_conditions WHERE reading_id = %s" % (reading_id)
         cur = mysql.connection.cursor()
@@ -834,7 +866,7 @@ def update_stations_conditions(reading_id, station_id):
         cur.execute(query4)
         current_condition_type = cur.fetchall()
         
-
+        # Include additional info for template render
         return render_template("intersect_table_update.j2", 
                                 reading=reading,
                                 station_id = station_id,
@@ -855,7 +887,7 @@ def update_stations_conditions(reading_id, station_id):
                                 ]
                                )
 
-
+    # Executes update operation, redirect to station condition from reading id
     if request.method == "POST":
         if request.form.get("Update"):
             condition_id = request.form['condition_id']
